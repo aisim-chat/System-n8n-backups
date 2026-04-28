@@ -1,0 +1,263 @@
+{
+  "updatedAt": "2026-04-28T22:53:09.642Z",
+  "createdAt": "2026-03-18T22:11:54.208Z",
+  "id": "mQVUMmmjOqOd4Gi1",
+  "name": "[ CUSTOM.TOOL ] payment",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "unique_id"
+            },
+            {
+              "name": "guardian_name"
+            },
+            {
+              "name": "child_name"
+            },
+            {
+              "name": "appointment_date"
+            }
+          ]
+        }
+      },
+      "id": "0989faf1-c81a-415d-8eeb-ba7a6bf6bffb",
+      "name": "Payment_Link",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1744,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "build-link",
+              "name": "payment_link",
+              "value": "=https://pay.zouti.com.br/checkout?poi=prod%5Foffer%5Fuyb01frku8m3qvq02ym7zi&utm_content={{ $json.unique_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55e607b8-33da-4ddb-8eac-0b03aae666d2",
+      "name": "Build_Payment_Link",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1984,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "out-link",
+              "name": "payment_link",
+              "value": "={{ $json.payment_link }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "63b868e6-3cb8-4e6f-bc71-7b5903286506",
+      "name": "Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2224,
+        800
+      ]
+    }
+  ],
+  "connections": {
+    "Payment_Link": {
+      "main": [
+        [
+          {
+            "node": "Build_Payment_Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build_Payment_Link": {
+      "main": [
+        [
+          {
+            "node": "Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "cR5uXe6oSXCCoUEL",
+    "callerPolicy": "workflowsFromSameOwner",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Payment_Link": [
+      {
+        "json": {
+          "unique_id": "9-150-219",
+          "guardian_name": "Felipe",
+          "child_name": "Henrique",
+          "appointment_date": "30/03/2026 às 15:20"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "28322a0a-6b29-4c58-ab51-f67dd5dcc579",
+  "activeVersionId": "28322a0a-6b29-4c58-ab51-f67dd5dcc579",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-08T02:36:34.949Z",
+      "createdAt": "2026-04-08T02:36:34.949Z",
+      "role": "workflow:owner",
+      "workflowId": "mQVUMmmjOqOd4Gi1",
+      "projectId": "Mv9lop2PjQQMoe46"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-04-07T22:00:51.457Z",
+    "createdAt": "2026-04-07T22:00:49.555Z",
+    "versionId": "28322a0a-6b29-4c58-ab51-f67dd5dcc579",
+    "workflowId": "mQVUMmmjOqOd4Gi1",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "unique_id"
+              },
+              {
+                "name": "guardian_name"
+              },
+              {
+                "name": "child_name"
+              },
+              {
+                "name": "appointment_date"
+              }
+            ]
+          }
+        },
+        "id": "0989faf1-c81a-415d-8eeb-ba7a6bf6bffb",
+        "name": "Payment_Link",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          1744,
+          800
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "build-link",
+                "name": "payment_link",
+                "value": "=https://pay.zouti.com.br/checkout?poi=prod%5Foffer%5Fuyb01frku8m3qvq02ym7zi&utm_content={{ $json.unique_id }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "55e607b8-33da-4ddb-8eac-0b03aae666d2",
+        "name": "Build_Payment_Link",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1984,
+          800
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "out-link",
+                "name": "payment_link",
+                "value": "={{ $json.payment_link }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "63b868e6-3cb8-4e6f-bc71-7b5903286506",
+        "name": "Output",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2224,
+          800
+        ]
+      }
+    ],
+    "connections": {
+      "Payment_Link": {
+        "main": [
+          [
+            {
+              "node": "Build_Payment_Link",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build_Payment_Link": {
+        "main": [
+          [
+            {
+              "node": "Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "AI SIM",
+    "name": "Version 28322a0a",
+    "description": "",
+    "autosaved": true
+  },
+  "tags": [
+    {
+      "updatedAt": "2026-04-28T22:52:43.009Z",
+      "createdAt": "2026-04-28T22:52:43.009Z",
+      "id": "X7ATJXtT6GVgcMba",
+      "name": "Backup"
+    }
+  ]
+}
