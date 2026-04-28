@@ -1,0 +1,151 @@
+{
+  "updatedAt": "2026-04-28T22:53:19.935Z",
+  "createdAt": "2026-03-18T20:48:46.847Z",
+  "id": "W9XCXp1RbGxpyUNM",
+  "name": "[ CUSTOM.TOOL ] CALCULATOR_AGE",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "birthDate"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        128,
+        224
+      ],
+      "id": "01b1fb43-b5b2-44b1-880e-d103f7fe043c",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// === Calculator_Age - N8N Code Node ===\nconst input = $input.first().json;\nconst raw = input.birthDate;\n\nif (!raw || typeof raw !== 'string') {\n  return [{ json: { erro: true, mensagem: \"Campo birthDate ausente ou inválido.\" } }];\n}\n\n// Suporta DD/MM/YYYY e YYYY-MM-DD\nlet day, month, year;\nif (raw.includes('/')) {\n  [day, month, year] = raw.split('/').map(Number);\n} else if (raw.includes('-')) {\n  [year, month, day] = raw.split('-').map(Number);\n} else {\n  return [{ json: { erro: true, mensagem: `Formato não reconhecido: ${raw}` } }];\n}\n\n// Validação básica\nif (!day || !month || !year || month < 1 || month > 12 || day < 1 || day > 31 || year < 1900) {\n  return [{ json: { erro: true, mensagem: \"Data de nascimento inválida.\" } }];\n}\n\n// Detecta rollover do JS (ex: 30/02 vira 02/03)\nconst birthDate = new Date(year, month - 1, day);\nif (birthDate.getDate() !== day || birthDate.getMonth() !== month - 1 || birthDate.getFullYear() !== year) {\n  return [{ json: { erro: true, mensagem: `Data inexistente: ${raw}` } }];\n}\n\n// Data de hoje zerada\nconst today = new Date();\nconst todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());\n\n// Validação de data futura\nif (birthDate > todayOnly) {\n  return [{ json: { erro: true, mensagem: \"Data de nascimento é no futuro.\" } }];\n}\n\n// Cálculo da idade\nlet years = todayOnly.getFullYear() - birthDate.getFullYear();\nlet months = todayOnly.getMonth() - birthDate.getMonth();\nlet days = todayOnly.getDate() - birthDate.getDate();\n\nif (days < 0) {\n  months--;\n  const prevMonth = new Date(todayOnly.getFullYear(), todayOnly.getMonth(), 0);\n  days += prevMonth.getDate();\n}\n\nif (months < 0) {\n  years--;\n  months += 12;\n}\n\n// Monta resposta legível\nlet descricao = '';\nif (years > 0) descricao += `${years} ano${years > 1 ? 's' : ''}`;\nif (months > 0) descricao += `${descricao ? ', ' : ''}${months} ${months > 1 ? 'meses' : 'mês'}`;\nif (days > 0) descricao += `${descricao ? ' e ' : ''}${days} dia${days > 1 ? 's' : ''}`;\nif (!descricao) descricao = 'Recém-nascido';\n\nreturn [{\n  json: {\n    erro: false,\n    anos: years,\n    meses: months,\n    dias: days,\n    descricao,\n    data_nascimento: raw\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        224
+      ],
+      "id": "eaaeca0d-5138-410e-8418-0f829f4c02f4",
+      "name": "Calculate_Age"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Calculate_Age",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "AhWOqXQLPIrVUblP",
+    "callerPolicy": "workflowsFromSameOwner",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "birthDate": "16/08/2024"
+        }
+      }
+    ]
+  },
+  "versionId": "43f20b65-696c-4b9d-bb6e-51928f9c50f3",
+  "activeVersionId": "43f20b65-696c-4b9d-bb6e-51928f9c50f3",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-08T02:37:02.827Z",
+      "createdAt": "2026-04-08T02:37:02.827Z",
+      "role": "workflow:owner",
+      "workflowId": "W9XCXp1RbGxpyUNM",
+      "projectId": "Mv9lop2PjQQMoe46"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-03-26T20:51:50.858Z",
+    "createdAt": "2026-03-26T20:51:42.467Z",
+    "versionId": "43f20b65-696c-4b9d-bb6e-51928f9c50f3",
+    "workflowId": "W9XCXp1RbGxpyUNM",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "birthDate"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          128,
+          224
+        ],
+        "id": "01b1fb43-b5b2-44b1-880e-d103f7fe043c",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "jsCode": "// === Calculator_Age - N8N Code Node ===\nconst input = $input.first().json;\nconst raw = input.birthDate;\n\nif (!raw || typeof raw !== 'string') {\n  return [{ json: { erro: true, mensagem: \"Campo birthDate ausente ou inválido.\" } }];\n}\n\n// Suporta DD/MM/YYYY e YYYY-MM-DD\nlet day, month, year;\nif (raw.includes('/')) {\n  [day, month, year] = raw.split('/').map(Number);\n} else if (raw.includes('-')) {\n  [year, month, day] = raw.split('-').map(Number);\n} else {\n  return [{ json: { erro: true, mensagem: `Formato não reconhecido: ${raw}` } }];\n}\n\n// Validação básica\nif (!day || !month || !year || month < 1 || month > 12 || day < 1 || day > 31 || year < 1900) {\n  return [{ json: { erro: true, mensagem: \"Data de nascimento inválida.\" } }];\n}\n\n// Detecta rollover do JS (ex: 30/02 vira 02/03)\nconst birthDate = new Date(year, month - 1, day);\nif (birthDate.getDate() !== day || birthDate.getMonth() !== month - 1 || birthDate.getFullYear() !== year) {\n  return [{ json: { erro: true, mensagem: `Data inexistente: ${raw}` } }];\n}\n\n// Data de hoje zerada\nconst today = new Date();\nconst todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());\n\n// Validação de data futura\nif (birthDate > todayOnly) {\n  return [{ json: { erro: true, mensagem: \"Data de nascimento é no futuro.\" } }];\n}\n\n// Cálculo da idade\nlet years = todayOnly.getFullYear() - birthDate.getFullYear();\nlet months = todayOnly.getMonth() - birthDate.getMonth();\nlet days = todayOnly.getDate() - birthDate.getDate();\n\nif (days < 0) {\n  months--;\n  const prevMonth = new Date(todayOnly.getFullYear(), todayOnly.getMonth(), 0);\n  days += prevMonth.getDate();\n}\n\nif (months < 0) {\n  years--;\n  months += 12;\n}\n\n// Monta resposta legível\nlet descricao = '';\nif (years > 0) descricao += `${years} ano${years > 1 ? 's' : ''}`;\nif (months > 0) descricao += `${descricao ? ', ' : ''}${months} ${months > 1 ? 'meses' : 'mês'}`;\nif (days > 0) descricao += `${descricao ? ' e ' : ''}${days} dia${days > 1 ? 's' : ''}`;\nif (!descricao) descricao = 'Recém-nascido';\n\nreturn [{\n  json: {\n    erro: false,\n    anos: years,\n    meses: months,\n    dias: days,\n    descricao,\n    data_nascimento: raw\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          352,
+          224
+        ],
+        "id": "eaaeca0d-5138-410e-8418-0f829f4c02f4",
+        "name": "Calculate_Age"
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Calculate_Age",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "AI SIM",
+    "name": "Version 43f20b65",
+    "description": "",
+    "autosaved": true
+  },
+  "tags": [
+    {
+      "updatedAt": "2026-04-28T22:52:43.009Z",
+      "createdAt": "2026-04-28T22:52:43.009Z",
+      "id": "X7ATJXtT6GVgcMba",
+      "name": "Backup"
+    }
+  ]
+}
