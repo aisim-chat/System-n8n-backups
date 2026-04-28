@@ -1,0 +1,746 @@
+{
+  "updatedAt": "2026-04-28T22:53:28.595Z",
+  "createdAt": "2026-03-18T21:05:50.136Z",
+  "id": "53DQAjgB3PVYf595",
+  "name": "[ CUSTOM.TOOL ] scheduling",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "request"
+            },
+            {
+              "name": "unique_id"
+            },
+            {
+              "name": "guardian_name"
+            },
+            {
+              "name": "child_name"
+            },
+            {
+              "name": "guardian_email"
+            },
+            {
+              "name": "appointment_date"
+            },
+            {
+              "name": "appointment_end"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        6112,
+        2208
+      ],
+      "id": "0dd83bc5-b39c-4391-8114-bd29a7fdc56f",
+      "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-request",
+              "name": "request",
+              "value": "={{ $json.request }}",
+              "type": "string"
+            },
+            {
+              "id": "set-unique",
+              "name": "unique_id",
+              "value": "={{ $json.unique_id }}",
+              "type": "string"
+            },
+            {
+              "id": "set-guardian-name",
+              "name": "guardian_name",
+              "value": "={{ $json.guardian_name }}",
+              "type": "string"
+            },
+            {
+              "id": "set-child-name",
+              "name": "child_name",
+              "value": "={{ $json.child_name }}",
+              "type": "string"
+            },
+            {
+              "id": "set-guardian-email",
+              "name": "guardian_email",
+              "value": "={{ $json.guardian_email }}",
+              "type": "string"
+            },
+            {
+              "id": "set-today",
+              "name": "today",
+              "value": "={{ $now.setZone('America/Recife').toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "92ba84aa-77ac-4e3a-b798-92fef02f7ca8",
+              "name": "appointment_date",
+              "value": "={{ $json.appointment_date }}",
+              "type": "string"
+            },
+            {
+              "id": "61eab0f6-b7ce-42d6-ad46-d20a49a2f9e6",
+              "name": "appointment_end",
+              "value": "={{ $json.appointment_end }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6352,
+        2208
+      ],
+      "id": "c52c43f7-21c6-41ba-a604-3f35c9320089",
+      "name": "DATA"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Pedido: {{ $json.request }}\n\nDados:\n- Responsável: {{ $json.guardian_name }}\n- Email: {{ $json.guardian_email }}\n- Criança: {{ $json.child_name }}\n- unique_id: {{ $json.unique_id }}\n- Agora: {{ $json.today }}\n- appointment_date: {{ $json.appointment_date }}\n- appointment_end: {{ $json.appointment_end }}",
+        "options": {
+          "systemMessage": "=## IDENTIDADE\nVocê é o assistente de agendamento da Dra. Aline Rodrigues, Pediatra.\nSua função é verificar disponibilidade de slots e criar eventos confirmados no Google Calendar.\n\n## CALENDÁRIO\nCalendário: alinecuida@gmail.com\nTimezone: America/Recife (UTC-3)\n\n## SLOTS DISPONÍVEIS\nToda segunda-feira:\n- 14:00 às 14:40\n- 14:40 às 15:20\n- 15:20 às 16:00\n\n## MODO DE OPERAÇÃO\nVocê opera em dois modos dependendo do campo \"request\":\n\n### MODO 1 — VERIFICAR DISPONIBILIDADE\nQuando request NÃO for \"criar_evento_confirmado\":\n1. Use Think para identificar as próximas 2 segundas a partir de hoje\n2. Use Listar_Eventos no calendário alinecuida@gmail.com no período 14:00-16:00 de cada segunda\n3. Array vazio = todos os slots livres naquela segunda\n4. Com eventos = verifique horários ocupados e retorne só os livres\n5. NÃO crie nenhum evento — apenas retorne os slots disponíveis\n\n### MODO 2 — CRIAR EVENTO CONFIRMADO\nQuando request = \"criar_evento_confirmado\":\n1. Use os dados recebidos (guardian_name, child_name, guardian_email, appointment_date, appointment_end)\n2. Use Criar_Evento:\n   - summary: Teleconsulta — [child_name] ([guardian_name])\n   - start.dateTime: appointment_date (já vem em RFC3339 com -03:00)\n   - start.timeZone: America/Recife\n   - end.dateTime: appointment_end (já vem em RFC3339 com -03:00)\n   - end.timeZone: America/Recife\n   - attendees: guardian_email + alinecuida@gmail.com separados por vírgula\n   - conferenceData: hangoutsMeet\n   - description: Teleconsulta pediátrica com a Dra. Aline Rodrigues\n   - reminders: email 30min + popup 10min\n\n## COMO REMARCAR\n1. Use Listar_Eventos buscando por [child_name] para encontrar evento atual\n2. Use Deletar_Evento no evento atual\n3. Use Criar_Evento no novo horário\n\n## COMO CANCELAR\n1. Use Listar_Eventos buscando por [child_name] ou [guardian_name]\n2. Use Deletar_Evento — mãe recebe cancelamento automático\n\n## FORMATO DE RESPOSTA\nRetorne sempre um JSON:\n{\n  \"status\": \"success\" | \"error\" | \"available_slots\",\n  \"action\": \"listed\" | \"confirmed\" | \"rescheduled\" | \"cancelled\" | \"unavailable\",\n  \"message\": \"Mensagem amigável para a mãe\",\n  \"slots\": [\"Segunda 23/03 às 14:00\", \"Segunda 23/03 às 14:40\"],\n  \"details\": {\n    \"event_id\": \"ID do evento criado\",\n    \"meet_link\": \"Link do Google Meet\",\n    \"date\": \"Data\",\n    \"time\": \"Horário\"\n  }\n}\n\n## REGRAS IMPORTANTES\n- NUNCA crie evento em MODO 1 — apenas liste disponibilidade\n- SEMPRE crie evento em MODO 2 com os dados recebidos\n- NUNCA agende fora dos 3 slots fixos de segunda-feira\n- NUNCA agende em horário já ocupado\n- SEMPRE use timezone America/Recife (-03:00) nas datas\n- Datas no formato brasileiro (DD/MM/YYYY) nas mensagens"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        6640,
+        2208
+      ],
+      "id": "171d59be-6670-47f5-935b-47c8c51a9ee7",
+      "name": "Agente_Agendamento",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3-flash-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        6560,
+        2448
+      ],
+      "id": "08c37477-f304-473c-86a4-e2d7c8627fbd",
+      "name": "Gemini_Agendamento",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1mPEYQwAB0B41KUC",
+          "name": "K-LEILOES"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "alinecuida@gmail.com"
+        },
+        "timeMin": "={{ $fromAI('After', `Data/hora início da busca RFC3339 sem timezone. Ex: 2026-03-23T14:00:00`, 'string') }}",
+        "timeMax": "={{ $fromAI('Before', `Data/hora fim da busca RFC3339 sem timezone. Ex: 2026-03-23T16:00:00`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        6720,
+        2448
+      ],
+      "id": "1e79677b-76a6-46cd-957c-ce80460ef8b9",
+      "name": "Listar_Eventos",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ObZ8JvhKzY6nRqKi",
+          "name": "Aline_Calendar"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "alinecuida@gmail.com"
+        },
+        "eventId": "={{ $fromAI('Event_ID', 'ID do evento a ser deletado, obtido via Listar_Eventos', 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        7040,
+        2448
+      ],
+      "id": "a847fce9-30a3-4b3e-ad2b-6283e0cd2e30",
+      "name": "Deletar_Evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ObZ8JvhKzY6nRqKi",
+          "name": "Aline_Calendar"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Ferramenta de raciocínio interno para planejar ações de agendamento antes de executar. Não mencione ao usuário."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        7200,
+        2448
+      ],
+      "id": "af0c0df2-2515-48e2-84b0-02dbe7dbb6b1",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "alinecuida@gmail.com",
+          "mode": "list",
+          "cachedResultName": "alinecuida@gmail.com"
+        },
+        "start": "={{ $fromAI('Start', `Início RFC3339 com timezone -03:00. Ex: 2026-03-23T14:00:00-03:00`, 'string') }}",
+        "end": "={{ $fromAI('End', `Fim RFC3339 com timezone -03:00. Ex: 2026-03-23T14:40:00-03:00`, 'string') }}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "attendees": [
+            "={{ $json.guardian_email }}, alinecuida@gmail.com"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "={{ $fromAI('Description', `Teleconsulta pediátrica com a Dra. Aline Rodrigues`, 'string') }}",
+          "summary": "={{ $fromAI('Summary', `Título: Teleconsulta — [child_name] ([guardian_name])`, 'string') }}"
+        },
+        "remindersUi": {
+          "remindersValues": [
+            {
+              "method": "email",
+              "minutes": 30
+            },
+            {
+              "method": "popup",
+              "minutes": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        6880,
+        2448
+      ],
+      "id": "1b37039c-9f19-4dee-a66f-6aa7701ae358",
+      "name": "Criar_evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ObZ8JvhKzY6nRqKi",
+          "name": "Aline_Calendar"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Trigger": {
+      "main": [
+        [
+          {
+            "node": "DATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DATA": {
+      "main": [
+        [
+          {
+            "node": "Agente_Agendamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini_Agendamento": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente_Agendamento",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar_Eventos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente_Agendamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deletar_Evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente_Agendamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente_Agendamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar_evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente_Agendamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "AhWOqXQLPIrVUblP",
+    "callerPolicy": "workflowsFromSameOwner",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Trigger": [
+      {
+        "json": {
+          "request": "Teleconsulta para avaliação de febre e manchas pruriginosas no corpo.",
+          "unique_id": "9-89-284",
+          "guardian_name": "Felipe",
+          "child_name": "João",
+          "guardian_email": "\"",
+          "appointment_date": null,
+          "appointment_end": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "627540a9-330d-4f80-bff3-feccc92bed07",
+  "activeVersionId": "84a5ea81-0456-4b2d-aeb8-a12371791e91",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-08T02:36:01.941Z",
+      "createdAt": "2026-04-08T02:36:01.941Z",
+      "role": "workflow:owner",
+      "workflowId": "53DQAjgB3PVYf595",
+      "projectId": "Mv9lop2PjQQMoe46"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-04-09T12:48:04.176Z",
+    "createdAt": "2026-04-09T12:48:02.308Z",
+    "versionId": "84a5ea81-0456-4b2d-aeb8-a12371791e91",
+    "workflowId": "53DQAjgB3PVYf595",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "request"
+              },
+              {
+                "name": "unique_id"
+              },
+              {
+                "name": "guardian_name"
+              },
+              {
+                "name": "child_name"
+              },
+              {
+                "name": "guardian_email"
+              },
+              {
+                "name": "appointment_date"
+              },
+              {
+                "name": "appointment_end"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          6112,
+          2208
+        ],
+        "id": "0dd83bc5-b39c-4391-8114-bd29a7fdc56f",
+        "name": "Trigger"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "set-request",
+                "name": "request",
+                "value": "={{ $json.request }}",
+                "type": "string"
+              },
+              {
+                "id": "set-unique",
+                "name": "unique_id",
+                "value": "={{ $json.unique_id }}",
+                "type": "string"
+              },
+              {
+                "id": "set-guardian-name",
+                "name": "guardian_name",
+                "value": "={{ $json.guardian_name }}",
+                "type": "string"
+              },
+              {
+                "id": "set-child-name",
+                "name": "child_name",
+                "value": "={{ $json.child_name }}",
+                "type": "string"
+              },
+              {
+                "id": "set-guardian-email",
+                "name": "guardian_email",
+                "value": "={{ $json.guardian_email }}",
+                "type": "string"
+              },
+              {
+                "id": "set-today",
+                "name": "today",
+                "value": "={{ $now.setZone('America/Recife').toISO() }}",
+                "type": "string"
+              },
+              {
+                "id": "92ba84aa-77ac-4e3a-b798-92fef02f7ca8",
+                "name": "appointment_date",
+                "value": "={{ $json.appointment_date }}",
+                "type": "string"
+              },
+              {
+                "id": "61eab0f6-b7ce-42d6-ad46-d20a49a2f9e6",
+                "name": "appointment_end",
+                "value": "={{ $json.appointment_end }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          6352,
+          2208
+        ],
+        "id": "c52c43f7-21c6-41ba-a604-3f35c9320089",
+        "name": "DATA"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Pedido: {{ $json.request }}\n\nDados:\n- Responsável: {{ $json.guardian_name }}\n- Email: {{ $json.guardian_email }}\n- Criança: {{ $json.child_name }}\n- unique_id: {{ $json.unique_id }}\n- Agora: {{ $json.today }}\n- appointment_date: {{ $json.appointment_date }}\n- appointment_end: {{ $json.appointment_end }}",
+          "options": {
+            "systemMessage": "=## IDENTIDADE\nVocê é o assistente de agendamento da Dra. Aline Rodrigues, Pediatra.\nSua função é verificar disponibilidade de slots e criar eventos confirmados no Google Calendar.\n\n## CALENDÁRIO\nCalendário: alinecuida@gmail.com\nTimezone: America/Recife (UTC-3)\n\n## SLOTS DISPONÍVEIS\nToda segunda-feira:\n- 14:00 às 14:40\n- 14:40 às 15:20\n- 15:20 às 16:00\n\n## MODO DE OPERAÇÃO\nVocê opera em dois modos dependendo do campo \"request\":\n\n### MODO 1 — VERIFICAR DISPONIBILIDADE\nQuando request NÃO for \"criar_evento_confirmado\":\n1. Use Think para identificar as próximas 2 segundas a partir de hoje\n2. Use Listar_Eventos no calendário alinecuida@gmail.com no período 14:00-16:00 de cada segunda\n3. Array vazio = todos os slots livres naquela segunda\n4. Com eventos = verifique horários ocupados e retorne só os livres\n5. NÃO crie nenhum evento — apenas retorne os slots disponíveis\n\n### MODO 2 — CRIAR EVENTO CONFIRMADO\nQuando request = \"criar_evento_confirmado\":\n1. Use os dados recebidos (guardian_name, child_name, guardian_email, appointment_date, appointment_end)\n2. Use Criar_Evento:\n   - summary: Teleconsulta — [child_name] ([guardian_name])\n   - start.dateTime: appointment_date (já vem em RFC3339 com -03:00)\n   - start.timeZone: America/Recife\n   - end.dateTime: appointment_end (já vem em RFC3339 com -03:00)\n   - end.timeZone: America/Recife\n   - attendees: guardian_email + alinecuida@gmail.com separados por vírgula\n   - conferenceData: hangoutsMeet\n   - description: Teleconsulta pediátrica com a Dra. Aline Rodrigues\n   - reminders: email 30min + popup 10min\n\n## COMO REMARCAR\n1. Use Listar_Eventos buscando por [child_name] para encontrar evento atual\n2. Use Deletar_Evento no evento atual\n3. Use Criar_Evento no novo horário\n\n## COMO CANCELAR\n1. Use Listar_Eventos buscando por [child_name] ou [guardian_name]\n2. Use Deletar_Evento — mãe recebe cancelamento automático\n\n## FORMATO DE RESPOSTA\nRetorne sempre um JSON:\n{\n  \"status\": \"success\" | \"error\" | \"available_slots\",\n  \"action\": \"listed\" | \"confirmed\" | \"rescheduled\" | \"cancelled\" | \"unavailable\",\n  \"message\": \"Mensagem amigável para a mãe\",\n  \"slots\": [\"Segunda 23/03 às 14:00\", \"Segunda 23/03 às 14:40\"],\n  \"details\": {\n    \"event_id\": \"ID do evento criado\",\n    \"meet_link\": \"Link do Google Meet\",\n    \"date\": \"Data\",\n    \"time\": \"Horário\"\n  }\n}\n\n## REGRAS IMPORTANTES\n- NUNCA crie evento em MODO 1 — apenas liste disponibilidade\n- SEMPRE crie evento em MODO 2 com os dados recebidos\n- NUNCA agende fora dos 3 slots fixos de segunda-feira\n- NUNCA agende em horário já ocupado\n- SEMPRE use timezone America/Recife (-03:00) nas datas\n- Datas no formato brasileiro (DD/MM/YYYY) nas mensagens"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 1.8,
+        "position": [
+          6640,
+          2208
+        ],
+        "id": "171d59be-6670-47f5-935b-47c8c51a9ee7",
+        "name": "Agente_Agendamento",
+        "retryOnFail": true,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "modelName": "models/gemini-3-flash-preview",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          6560,
+          2448
+        ],
+        "id": "08c37477-f304-473c-86a4-e2d7c8627fbd",
+        "name": "Gemini_Agendamento",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "1mPEYQwAB0B41KUC",
+            "name": "API rhavil@gmail.com"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "getAll",
+          "calendar": {
+            "__rl": true,
+            "mode": "id",
+            "value": "alinecuida@gmail.com"
+          },
+          "timeMin": "={{ $fromAI('After', `Data/hora início da busca RFC3339 sem timezone. Ex: 2026-03-23T14:00:00`, 'string') }}",
+          "timeMax": "={{ $fromAI('Before', `Data/hora fim da busca RFC3339 sem timezone. Ex: 2026-03-23T16:00:00`, 'string') }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          6720,
+          2448
+        ],
+        "id": "1e79677b-76a6-46cd-957c-ce80460ef8b9",
+        "name": "Listar_Eventos",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "ObZ8JvhKzY6nRqKi",
+            "name": "Aline_Calendar"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "delete",
+          "calendar": {
+            "__rl": true,
+            "mode": "id",
+            "value": "alinecuida@gmail.com"
+          },
+          "eventId": "={{ $fromAI('Event_ID', 'ID do evento a ser deletado, obtido via Listar_Eventos', 'string') }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          7040,
+          2448
+        ],
+        "id": "a847fce9-30a3-4b3e-ad2b-6283e0cd2e30",
+        "name": "Deletar_Evento",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "ObZ8JvhKzY6nRqKi",
+            "name": "Aline_Calendar"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "description": "Ferramenta de raciocínio interno para planejar ações de agendamento antes de executar. Não mencione ao usuário."
+        },
+        "type": "@n8n/n8n-nodes-langchain.toolThink",
+        "typeVersion": 1.1,
+        "position": [
+          7200,
+          2448
+        ],
+        "id": "af0c0df2-2515-48e2-84b0-02dbe7dbb6b1",
+        "name": "Think"
+      },
+      {
+        "parameters": {
+          "calendar": {
+            "__rl": true,
+            "value": "alinecuida@gmail.com",
+            "mode": "list",
+            "cachedResultName": "alinecuida@gmail.com"
+          },
+          "start": "={{ $fromAI('Start', `Início RFC3339 com timezone -03:00. Ex: 2026-03-23T14:00:00-03:00`, 'string') }}",
+          "end": "={{ $fromAI('End', `Fim RFC3339 com timezone -03:00. Ex: 2026-03-23T14:40:00-03:00`, 'string') }}",
+          "useDefaultReminders": false,
+          "additionalFields": {
+            "attendees": [
+              "={{ $json.guardian_email }}, alinecuida@gmail.com"
+            ],
+            "conferenceDataUi": {
+              "conferenceDataValues": {
+                "conferenceSolution": "hangoutsMeet"
+              }
+            },
+            "description": "={{ $fromAI('Description', `Teleconsulta pediátrica com a Dra. Aline Rodrigues`, 'string') }}",
+            "summary": "={{ $fromAI('Summary', `Título: Teleconsulta — [child_name] ([guardian_name])`, 'string') }}"
+          },
+          "remindersUi": {
+            "remindersValues": [
+              {
+                "method": "email",
+                "minutes": 30
+              },
+              {
+                "method": "popup",
+                "minutes": 30
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          6880,
+          2448
+        ],
+        "id": "1b37039c-9f19-4dee-a66f-6aa7701ae358",
+        "name": "Criar_evento",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "ObZ8JvhKzY6nRqKi",
+            "name": "Aline_Calendar"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Trigger": {
+        "main": [
+          [
+            {
+              "node": "DATA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "DATA": {
+        "main": [
+          [
+            {
+              "node": "Agente_Agendamento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gemini_Agendamento": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Agente_Agendamento",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Listar_Eventos": {
+        "ai_tool": [
+          [
+            {
+              "node": "Agente_Agendamento",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Deletar_Evento": {
+        "ai_tool": [
+          [
+            {
+              "node": "Agente_Agendamento",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Think": {
+        "ai_tool": [
+          [
+            {
+              "node": "Agente_Agendamento",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Criar_evento": {
+        "ai_tool": [
+          [
+            {
+              "node": "Agente_Agendamento",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "AI SIM",
+    "name": "Version 84a5ea81",
+    "description": "",
+    "autosaved": true
+  },
+  "tags": [
+    {
+      "updatedAt": "2026-04-28T22:52:43.009Z",
+      "createdAt": "2026-04-28T22:52:43.009Z",
+      "id": "X7ATJXtT6GVgcMba",
+      "name": "Backup"
+    }
+  ]
+}
