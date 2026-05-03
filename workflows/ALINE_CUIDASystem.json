@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-01T04:34:02.079Z",
+  "updatedAt": "2026-05-02T19:22:44.947Z",
   "createdAt": "2026-03-18T20:27:49.998Z",
   "id": "tnVaJHpdh2UY59Z7",
   "name": "ALINE_CUIDA.System",
@@ -543,7 +543,6 @@
     },
     {
       "parameters": {
-        "modelName": "models/gemini-3-flash-preview",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
@@ -891,19 +890,19 @@
               "base_url": "https://app.cria.chat"
             },
             "conversation": {
-              "id": 338,
-              "unique_id": "9-89-338"
+              "id": 90,
+              "unique_id": "9-89-90"
             },
             "contact": {
-              "id": 53550,
-              "name": "Ma",
-              "phone": "5527997131773"
+              "id": 11952,
+              "name": "Kamila",
+              "phone": "5527988193961"
             },
             "message": {
-              "aggregated": "A vacina DTP ou HPV da reação em criança de 9 anos\n?"
+              "aggregated": "Boa tarde, dra. \nBen Lucca comeu um algodão doce que depois que comeu uma boa parte estava com bolô. 😔 O que posso fazer?"
             },
             "user": {
-              "name": "Marcilene",
+              "name": "Kamila",
               "email": null,
               "inbox": 89,
               "usage": {
@@ -917,24 +916,32 @@
               },
               "is_new": false,
               "account": 9,
-              "contact": 53550,
-              "user_id": "9-89-338",
-              "created_at": "2026-04-12T23:38:20.889658",
+              "contact": 11952,
+              "user_id": "9-89-90",
+              "created_at": "2026-04-06T18:40:09.68781",
               "user_labels": [
-                "filho_cadastrado, ativo"
+                "ativo"
               ],
               "actual_stage": 2,
-              "conversation": 338,
-              "display_name": "Ma",
+              "conversation": 90,
+              "display_name": "Kamila",
               "custom_attributes": {
-                "phone": null,
                 "children": [
                   {
-                    "name": "Bernardo",
-                    "birth_date": "19-03-2017"
+                    "name": "Ben Lucca",
+                    "birth_date": "27-08-2022"
                   }
                 ],
-                "guardian_name": "Marcilene"
+                "guardian_name": "Kamila",
+                "last_checkpoint": {
+                  "summary": "Ben Lucca (3 anos e 5 meses) com quadro de gripe há 3 dias, febre de 38,1°C (1x ao dia, cede com dipirona) e queixa de diminuição da audição (hipoacusia). Ativo, mas com redução de apetite. Sem otalgia ou otorreia relatada.",
+                  "health_flags": [
+                    "gripe",
+                    "febre",
+                    "diminuição da audição"
+                  ],
+                  "recommendations": "Agendar consulta pediátrica para avaliação do ouvido (otoscopia). Manter lavagem nasal frequente e hidratação. Observar dor de ouvido ou secreção."
+                }
               }
             },
             "stages": {
@@ -979,7 +986,7 @@
             "project_info": {
               "name": "Aline Cuida"
             },
-            "labels": "[\"filho_cadastrado\",\"ativo\"]",
+            "labels": "[]",
             "project_user": {
               "token": "PArdJisYhtUCfEo9ZurbzxQ9"
             },
@@ -995,7 +1002,7 @@
       }
     ]
   },
-  "versionId": "b5a0af10-4c0b-42b7-97bb-d0e50259608d",
+  "versionId": "5f17691e-ff90-4e4a-bdaa-38ea50eae497",
   "activeVersionId": "b5a0af10-4c0b-42b7-97bb-d0e50259608d",
   "triggerCount": 0,
   "shared": [
